@@ -161,7 +161,7 @@ var colorPicker = angular.module('colorpicker', [])
 colorPicker.directive('colorPicker', ['$document', '$compile', 'ColorHelper', function ($document, $compile, ColorHelper) {
         return {
             restrict: 'A',
-            scope: {colorPickerModel: '=', colorPickerOutputFormat: '='},
+            scope: {colorPickerModel: '=', colorPickerOutputFormat: '=', appendTo: '='},
             controller: ['$scope', function ($scope) {
                     $scope.show = false;
                     $scope.sAndLMax = {};
@@ -376,7 +376,12 @@ colorPicker.directive('colorPicker', ['$document', '$compile', 'ColorHelper', fu
                         '   <button type="button" class="{{cancelButtonClass}}" ng-show="showCancelButton" ng-click="cancelColor()">Cancel</button>' +
                         '</div>');
 
-                document.getElementsByTagName("body")[0].appendChild(template[0]);
+                if(scope.appendTo){
+                    scope.appendTo.append(template[0]);
+                }
+                else{
+                    document.getElementsByTagName("body")[0].appendChild(template[0]);
+                }
                 $compile(template)(scope);
 
                 function updateFromString(string) {
