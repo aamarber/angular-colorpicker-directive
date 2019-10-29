@@ -33,6 +33,10 @@ Default option is the first item.
        color-picker-spinner-hsla-steps="1;1;1;0.1"
        color-picker-show-cancel-button="false, true"
        color-picker-cancel-button-class="your custom class"
+       appendTo='$element',
+       prependTo='$element',
+       containerElement='$element',
+       onShowChanged='callback'
   />
 ```
 
