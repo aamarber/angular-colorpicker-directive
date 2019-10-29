@@ -166,6 +166,7 @@ colorPicker.directive('colorPicker', ['$document', '$compile', 'ColorHelper', fu
                 colorPickerOutputFormat: '=',
                 appendTo: '=',
                 prependTo: '=',
+                containerElement: '=',
                 onShowChanged: '='
             },
             controller: ['$scope', function ($scope) {
@@ -499,17 +500,22 @@ colorPicker.directive('colorPicker', ['$document', '$compile', 'ColorHelper', fu
                 });
 
                 function mousedown(event) {
-                    if (event.target !== element[0] && template[0] !== event.target && !isDescendant(template[0], event.target)) {
-                        scope.$apply(function () {
-                            scope.show = false;
-
-                            if(scope.onShowChanged){
-                                scope.onShowChanged(scope.show);
-                            }
-                        });
-                        $document.off('mousedown', mousedown);
-                        angular.element(window).off('resize', resize);
+                    if (event.target === element[0] || template[0] === event.target || isDescendant(template[0], event.target)
+                        || (scope.appendTo && isDescendant(scope.appendTo[0], event.target))
+                        || (scope.prependTo && isDescendant(scope.prependTo[0], event.target))
+                        || (scope.containerElement && isDescendant(scope.containerElement[0], event.target))) {
+                        return;
                     }
+
+                    scope.$apply(function () {
+                        scope.show = false;
+
+                        if(scope.onShowChanged){
+                            scope.onShowChanged(scope.show);
+                        }
+                    });
+                    $document.off('mousedown', mousedown);
+                    angular.element(window).off('resize', resize);
                 }
 
                 function isDescendant(parent, child) {
