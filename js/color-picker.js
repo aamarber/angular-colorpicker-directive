@@ -161,7 +161,13 @@ var colorPicker = angular.module('colorpicker', [])
 colorPicker.directive('colorPicker', ['$document', '$compile', 'ColorHelper', function ($document, $compile, ColorHelper) {
         return {
             restrict: 'A',
-            scope: {colorPickerModel: '=', colorPickerOutputFormat: '=', appendTo: '='},
+            scope: {
+                colorPickerModel: '=',
+                colorPickerOutputFormat: '=',
+                appendTo: '=',
+                prependTo: '=',
+                onShowChanged: '='
+            },
             controller: ['$scope', function ($scope) {
                     $scope.show = false;
                     $scope.sAndLMax = {};
@@ -341,6 +347,10 @@ colorPicker.directive('colorPicker', ['$document', '$compile', 'ColorHelper', fu
                     element.val(scope.outputColor);
                 }
 
+                if(attr.hideAlphaSelector === 'true'){
+                    scope.hideAlphaSelector = true;
+                }
+
                 template = angular.element('<div ng-show="show" class="color-picker {{extraLargeClass}}">' +
                         '   <div class="arrow arrow-' + attr.colorPickerPosition + '"></div>' +
                         '   <div slider rg-x=1 rg-y=1 action="setSaturationAndBrightness(s, v, rgX, rgY)" class="saturation-lightness" ng-style="{\'background-color\':hueSliderColor}">' +
@@ -349,7 +359,7 @@ colorPicker.directive('colorPicker', ['$document', '$compile', 'ColorHelper', fu
                         '   <div slider rg-x=1 action="setHue(v, rg)" class="hue">' +
                         '       <div class="cursor" ng-style="{\'left\':hueSlider.left}"></div>' +
                         '   </div>' +
-                        '   <div slider rg-x=1 action="setAlpha(v, rg)" class="alpha" ng-style="{\'background-color\':alphaSliderColor}">' +
+                        '   <div ng-hide="hideAlphaSelector" slider rg-x=1 action="setAlpha(v, rg)" class="alpha" ng-style="{\'background-color\':alphaSliderColor}">' +
                         '       <div class="cursor" ng-style="{\'left\':alphaSlider.left}"></div>' +
                         '   </div>' +
                         '   <div class="selected-color-background"></div>' +
@@ -358,15 +368,15 @@ colorPicker.directive('colorPicker', ['$document', '$compile', 'ColorHelper', fu
                         '       <input text type="number" pattern="[0-9]*" min="0" max="360" step="' + scope.hslaSteps.h + '" rg=360 action="setHue(v, rg)" ng-model="hslaText.h" spinner="' + attr.colorPickerShowInputSpinner + '" />' +
                         '       <input text type="number" pattern="[0-9]*" min="0" max="100" step="' + scope.hslaSteps.s + '" rg=100 action="setSaturation(v, rg)" ng-model="hslaText.s" spinner="' + attr.colorPickerShowInputSpinner + '" />' +
                         '       <input text type="number" pattern="[0-9]*" min="0" max="100" step="' + scope.hslaSteps.l + '" rg=100 action="setLightness(v, rg)" ng-model="hslaText.l" spinner="' + attr.colorPickerShowInputSpinner + '" />' +
-                        '       <input text type="number" pattern="[0-9]+([\.,][0-9]{1,2})?" min="0" max="1" step="' + scope.hslaSteps.a + '" rg=1 action="setAlpha(v, rg)" ng-model="hslaText.a" spinner="' + attr.colorPickerShowInputSpinner + '" />' +
-                        '       <div>H</div><div>S</div><div>L</div><div>A</div>' +
+                        '       <input ng-hide="hideAlphaSelector" text type="number" pattern="[0-9]+([\.,][0-9]{1,2})?" min="0" max="1" step="' + scope.hslaSteps.a + '" rg=1 action="setAlpha(v, rg)" ng-model="hslaText.a" spinner="' + attr.colorPickerShowInputSpinner + '" />' +
+                        '       <div>H</div><div>S</div><div>L</div><div ng-hide="hideAlphaSelector">A</div>' +
                         '   </div>' +
                         '   <div ng-show="type==1" class="rgba-text">' +
                         '       <input text type="number" pattern="[0-9]*" min="0" max="255" step="' + scope.rbgaSteps.r + '" rg=255 action="setR(v, rg)" ng-model="rgbaText.r" spinner="' + attr.colorPickerShowInputSpinner + '" />' +
                         '       <input text type="number" pattern="[0-9]*" min="0" max="255" step="' + scope.rbgaSteps.g + '" rg=255 action="setG(v, rg)" ng-model="rgbaText.g" spinner="' + attr.colorPickerShowInputSpinner + '" />' +
                         '       <input text type="number" pattern="[0-9]*" min="0" max="255" step="' + scope.rbgaSteps.b + '" rg=255 action="setB(v, rg)" ng-model="rgbaText.b" spinner="' + attr.colorPickerShowInputSpinner + '" />' +
-                        '       <input text type="number" pattern="[0-9]+([\.,][0-9]{1,2})?" min="0" max="1" step="' + scope.rbgaSteps.a + '" rg=1 action="setAlpha(v, rg)" ng-model="rgbaText.a" spinner="' + attr.colorPickerShowInputSpinner + '" />' +
-                        '       <div>R</div><div>G</div><div>B</div><div>A</div>' +
+                        '       <input ng-hide="hideAlphaSelector" text type="number" pattern="[0-9]+([\.,][0-9]{1,2})?" min="0" max="1" step="' + scope.rbgaSteps.a + '" rg=1 action="setAlpha(v, rg)" ng-model="rgbaText.a" spinner="' + attr.colorPickerShowInputSpinner + '" />' +
+                        '       <div>R</div><div>G</div><div>B</div><div ng-hide="hideAlphaSelector">A</div>' +
                         '   </div>' +
                         '   <div class="hex-text" ng-show="type==0">' +
                         '       <input text type="text" action="setColorFromHex(string)" ng-model="hexText"/>' +
@@ -378,6 +388,9 @@ colorPicker.directive('colorPicker', ['$document', '$compile', 'ColorHelper', fu
 
                 if(scope.appendTo){
                     scope.appendTo.append(template[0]);
+                }
+                else if(scope.prependTo){
+                    scope.prependTo.prepend(template[0]);
                 }
                 else{
                     document.getElementsByTagName("body")[0].appendChild(template[0]);
@@ -424,6 +437,10 @@ colorPicker.directive('colorPicker', ['$document', '$compile', 'ColorHelper', fu
                     updateFromString(scope.colorPickerModel);
                     $document.off('mousedown', mousedown);
                     angular.element(window).off('resize', resize);
+
+                    if(scope.onShowChanged){
+                        scope.onShowChanged(scope.show);
+                    }
                 };
 
                 element.on('click', open);
@@ -431,6 +448,10 @@ colorPicker.directive('colorPicker', ['$document', '$compile', 'ColorHelper', fu
                     initialValue = scope.colorPickerModel;
                     scope.$apply(function () {
                         scope.show = true;
+
+                        if(scope.onShowChanged){
+                            scope.onShowChanged(scope.show);
+                        }
                     });                    
                     scope.$apply(function () {
                         scope.sAndLMax = {x: template[0].getElementsByClassName("saturation-lightness")[0].offsetWidth, y: template[0].getElementsByClassName("saturation-lightness")[0].offsetHeight};
@@ -481,6 +502,10 @@ colorPicker.directive('colorPicker', ['$document', '$compile', 'ColorHelper', fu
                     if (event.target !== element[0] && template[0] !== event.target && !isDescendant(template[0], event.target)) {
                         scope.$apply(function () {
                             scope.show = false;
+
+                            if(scope.onShowChanged){
+                                scope.onShowChanged(scope.show);
+                            }
                         });
                         $document.off('mousedown', mousedown);
                         angular.element(window).off('resize', resize);
